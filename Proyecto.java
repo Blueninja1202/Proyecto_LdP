@@ -34,14 +34,18 @@ de lo contrario, devuelve false.
         // Verificar colisiones y límites del tablero al cargar dicha simulacion
 
         for (int i = 0; i < length; i++) {
-            if(orientation == 'h') {
-                if(tablero[row][column + i] != -1 || column + i >= 6) {
+            switch (orientation) {
+                case 'h':
+                    if(tablero[row][column + i] != -1 || column + i >= 6) {
+                        return false;
+                    }   break;
+                case 'v':
+                    if(tablero[row + i][column] != -1 || row + i >= 6) {
+                        return false;
+                    }   break;
+                default:
+                    System.out.println("Error al cargar, orientacion no reconocida");
                     return false;
-                }
-            } else {
-                if(tablero[row + i][column] != -1 || row + i >= 6) {
-                    return false;
-                }
             }
         }
 
@@ -151,7 +155,8 @@ de lo contrario, devuelve false.
                 }
             }
 
-        // Verificar si el movimiento es posible en la dirección especificada, dependiendo de la orientación del vehículo (horizontal o vertical).  
+        // Verificar si el movimiento es posible en la dirección especificada, 
+        // dependiendo de la orientación del vehículo (horizontal o vertical).  
 
         if(vehiculo.get_orientation() == 'h') {
 
@@ -221,7 +226,8 @@ de lo contrario, devuelve false.
         }
 
 
-    // Este método realiza el movimiento del vehículo en la dirección especificada, actualizando el tablero con la nueva posición del vehículo.
+    // Este método realiza el movimiento del vehículo en la dirección especificada, 
+    // actualizando el tablero con la nueva posición del vehículo.
         
     public void Mover(Consumidor vehiculo, int direction) {
 
@@ -251,19 +257,18 @@ de lo contrario, devuelve false.
 
         for (int i = 0; i < length; i++) {
             if(orientation == 'h') {
-                battery -= 1;
                 tablero[row][column + i] = id;
                 
 
             } else {
-                battery -= 1;
                 tablero[row + i][column] = id;
 
             }
         }
+        battery -= 1;
         vehiculo.set_battery(battery);
+        vehiculo.imprimirDatos();
         imprimir_tablero();
-
     }    
 
     // Este método se llama cuando un vehículo necesita recargar su batería. 
@@ -283,6 +288,8 @@ de lo contrario, devuelve false.
             }
 
             if(vehiculo_recargar != null) {
+            System.out.println("Se recarga el vehiculo con ID:" + vehiculo_recargar.get_ID());
+            System.out.println("_________________________");
             vehiculo_recargar.set_battery(10);
             vehiculo_recargar = null;
             notifyAll();
@@ -359,7 +366,7 @@ class Consumidor extends Thread {
         while(monitor.isSimulador()) {
             monitor.MoverVehiculo(this);
             try {
-                Thread.sleep(800); // Simula el tiempo que tarda el vehículo en intentar moverse
+                Thread.sleep(1000); // Simula el tiempo que tarda el vehículo en intentar moverse
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -421,13 +428,18 @@ class Consumidor extends Thread {
 public class Proyecto {
 public static void main(String args[] ) throws FileNotFoundException {
 
-    String archivo = args[0];
 
+    // Se toma el nombre del archivo por el argumento pasado por el main
+    String archivo = args[0];
     File file = new File(archivo);
     Scanner sc = new Scanner(file);
 
+    // Se tienen dos variables los cuales dictaminan cuantos vehiculos y cargadores hay
+
     int Cantidad_de_Vehiculos = 0;
     int Cantidad_de_Cargadores = 0;
+
+    //Se hace una pasada primeramente para poder contar cuantos vehiculos y cargadores hay
 
     while(sc.hasNextLine()) {
         String line = sc.nextLine();
@@ -435,21 +447,22 @@ public static void main(String args[] ) throws FileNotFoundException {
         if(line.startsWith("Cargadores")){ 
             String[] parts = line.split(", ");
             Cantidad_de_Cargadores = Integer.parseInt(parts[1]);
-            System.out.println("Número de cargadores: " + Cantidad_de_Cargadores);
         } else{
             
         Cantidad_de_Vehiculos++;
         }
     }
 
+    // Iniciamos la matriz de el tablero y se le pasa al monitor
+    //Recurso critico
     int tablero[][] = new int[6][6];
     Monitor estacionamiento = new Monitor(tablero);
-    System.out.println("Hola Mundo");
-    System.out.println("Cantidad de Vehiculos: " + Cantidad_de_Vehiculos);
-
     Consumidor[] vehiculos = new Consumidor[Cantidad_de_Vehiculos];
+    int IDs [] = new int[Cantidad_de_Vehiculos];
 
     int i = 0;
+
+    // Se hace nuevamente la pasada al archivo pero esta vez para tomar los datos sabiendo la cantidad de vehiculos que hay
     Scanner sc1 = new Scanner(file);
     while(i < Cantidad_de_Vehiculos) {
         String line = sc1.nextLine();
@@ -457,8 +470,11 @@ public static void main(String args[] ) throws FileNotFoundException {
         if(line.startsWith("Cargadores")){ 
             String[] parts = line.split(", ");
             Cantidad_de_Cargadores = Integer.parseInt(parts[1]);
-            System.out.println("Número de cargadores: " + Cantidad_de_Cargadores);
         } else{
+
+            // Tomamos en cuenta que la forma que se suministran los datos son
+            // ID - Orientacion - Fila - Columna - Anchura - Bateria
+
         String[] parts = line.split(", ");
         int ID = Integer.parseInt(parts[0]);
         char orientation = parts[1].charAt(0);
@@ -466,22 +482,42 @@ public static void main(String args[] ) throws FileNotFoundException {
         int column = Integer.parseInt(parts[3]);
         int length = Integer.parseInt(parts[4]);
         int battery = Integer.parseInt(parts[5]);
+
+        IDs[i] = ID;
+
         vehiculos[i] = new Consumidor(estacionamiento, ID, orientation, row, column, length, battery);
         if(!vehiculos[i].vehiculo_cargar()) {
+
+            // Si recibimos un erro a la hora de cargar un vehiculo se sale de la simulacion
+
             System.out.println("Error al cargar el vehículo con ID: " + ID);
             System.exit(1);
         }
-        estacionamiento.imprimir_tablero();
         i++;
         }
     }
     i = 0;
 
+    for(int j = 0; j < Cantidad_de_Vehiculos; j++){
+        for (int k = 0; k < Cantidad_de_Vehiculos; k++){
+
+            if(IDs[j] == IDs[k] && j != k){
+                System.out.println("Error al cargar vehiculo, ID repetida");
+                System.exit(1);
+            }
+
+        }
+    }
+
     while(i < Cantidad_de_Vehiculos) {
+        System.out.println( "Datos inicial del vehiculo ID: " + vehiculos[i].get_ID());
         vehiculos[i].imprimirDatos();
+        System.out.println("____________________________");
         i++;
     }
 
+
+    System.out.println("____________________________");
     for(i = 0; i < Cantidad_de_Vehiculos; i++) {
         vehiculos[i].start();
     }
