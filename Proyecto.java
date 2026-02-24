@@ -484,7 +484,14 @@ public static void main(String args[] ) throws FileNotFoundException {
         int battery = Integer.parseInt(parts[5]);
 
         IDs[i] = ID;
+        
+        if(row < 0 || column < 0){
 
+            System.out.println("Error al cargar el vehículo con ID: " + ID + " Fila o columna negativo");
+            System.exit(1);
+
+        }
+        
         vehiculos[i] = new Consumidor(estacionamiento, ID, orientation, row, column, length, battery);
         if(!vehiculos[i].vehiculo_cargar()) {
 
