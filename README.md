@@ -79,3 +79,10 @@ Estos casos están pensados para generar errores específicos:
 * caso5.txt: Presenta un solapamiento al inicializar el tablero.
 
 * caso6.txt: Contiene una orientación errada para los vehículos.
+
+# Correr el proyecto
+
+Utilizamos un archivo Makefile para que no haya ningun tipo de problema a la hora de compilar el proyecto, para poder usarlo unicamente se tiene que seguir los siguientes pasos:
+
+* Primero, se habre la terminal de linux y se hace **make**
+* Segundo, una vez compilado la ejecucion viene dada por **java Proyecto nombreDelArchivo.txt**
