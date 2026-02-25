@@ -1,53 +1,57 @@
-# Proyecto_LdP - Luis Hernandez 29.661.835
+# Proyecto_LdP - Luis Hernández 29.661.835
 
-Para este proyeco se penso en una estrategia para poder implementar el modelo Monitor de una manera sencilla
+Para este **proyecto** se **pensó** en una estrategia para poder implementar el modelo Monitor de una manera sencilla.
 
-Para ello podemos decir que el Monitor (estacionamiento) es el encargado de administrar el uso de los recursos criticos y banderas para dicho proyecto, entre lo que podemos obtener como recursos son:
-  - Tablero, este es el recurso critico
-  - Simulador, esta bandera lo que me ayuda hacer es controlar todos los hilos dentro de la simulacion, esta misma acaba cuando el vehiculo ID 0 llega al final
-  - Contamos con una variable de tipo Consumidor el cual hace que ese vehiculo en particular se pueda recargar
+Para ello podemos decir que el Monitor (estacionamiento) es el encargado de administrar el uso de los recursos **críticos** y banderas para dicho proyecto; entre los recursos que gestiona se encuentran:
+* **Tablero**: este es el recurso **crítico**.
+* **Simulador**: esta bandera ayuda a controlar todos los hilos dentro de la **simulación**; la misma acaba cuando el **vehículo** ID 0 llega al final.
+* **Variable de tipo Consumidor**: esta representa el vehículo
+* **Variable de tipo Productor**: esta representa a los cargadores
 
-# Metodos Importantes
+# Métodos Importantes
 
-Para realizar este proyecto se apoyo en una idea de simplificar la situacion, por lo cual se intento en minimizar las variables syncronized en la cual se tiene 4 y ademas tiene otras variables no de tipo syncronized pero las cuales ayuda a que la simulacion siga su curso sin necesidad de sincronizar
+Para realizar este proyecto se **apoyó** en la idea de simplificar la **situación**, por lo cual se **intentó** minimizar las variables **synchronized**. Se definieron 4 métodos sincronizados y otras variables no sincronizadas que ayudan a que la **simulación** siga su curso.
 
-  # FUNCIONES SYNCRONIZED
-    - carga_inicial(id, orientation, row, column, lenght)
-    - MoverVehiculo(Consumidor)
-    - SolicitarRecarga(Consumidor)
-    - RecargarVehiculo()
+## FUNCIONES SYNCHRONIZED
+* `carga_inicial(id, orientation, row, column, length)`
+* `MoverVehiculo(Consumidor)`
+* `SolicitarRecarga(Consumidor)`
+* `RecargarVehiculo()`
 
-  # FUNCIONES NO SYNCRONIZED
-    MONITOR
-      - isSimulador()
-      - isGoal()
-      - Intento_de_Mover(Consumidor, direccion)
-      - Mover(Consumidor, direccion)
-      - imprimir_tablero()
-    
-      CONSUMIDOR
-        - public boolean vehiculo_cargar()
-        - public int get_baterry()
-        - public int get_ID()
-        - public int get_row()
-        - public int get_column()
-        - public char get_orientation()
-        - public int get_length()
-        - public void set_row(int row)
-        - public void set_column(int column)
-        - public void set_battery(int battery)
+## FUNCIONES NO SYNCHRONIZED
 
-Ahora bien, la estrategia que se siguio o la linea de vida que se tiene del proyecto es:
+### MONITOR
+* `isSimulador()`
+* `isGoal()`
+* `Intento_de_Mover(Consumidor, dirección)`
+* `Mover(Consumidor, dirección)`
+* `imprimir_tablero()`
+
+### CONSUMIDOR
+* `public boolean vehiculo_cargar()`
+* `public int get_battery()`
+* `public int get_ID()`
+* `public int get_row()`
+* `public int get_column()`
+* `public char get_orientation()`
+* `public int get_length()`
+* `public void set_row(int row)`
+* `public void set_column(int column)`
+* `public void set_battery(int battery)`
+
+# Estrategia y Línea de Vida
+
+La estrategia seguida para el flujo de los hilos es la siguiente:
 
 ```text
 Consumidor
 └── MoverVehiculo(this)
     └── Ver Carga
-        ├── Si bateria > 0
+        ├── Si batería > 0
         │   └── Intento_de_Mover (direcciones según orientación)
-        │       ├── Si true: Actualiza tablero -> notifyAll() -> Proximo
+        │       ├── Si true: Actualiza tablero -> notifyAll() -> Próximo
         │       └── Si false: Colisión detectada -> wait()
-        └── Si bateria == 0
+        └── Si batería == 0
             └── SolicitarRecarga() -> wait()
 ```
 ```text
@@ -56,10 +60,22 @@ Productor
         ├── Si tiene carga
         │   └── wait()
         └── Si no tiene carga
-            └── RecargarVehiculo() -> notifyall()
+            └── RecargarVehiculo() -> notifyAll()
 ```
-Y ya con esa linea de vida se consiguio que el proyecto sea posible
+# Instrucciones de Uso
 
-Ahora bien, a la hora de empezar a utilizar el programa tenemos que tener lo siguiente:
-  - Un .txt que se pasara por parametro en el main
-  - El .txt debera tener un formato en el cual por cada ',' debe de haber un espacio, ejemplo: 0, h, 2, 3, 3, 10
+Para utilizar el programa se debe considerar lo siguiente:
+
+* Se debe pasar un archivo .txt por parámetro en el main.
+
+* El archivo .txt deberá tener un formato donde, tras cada coma (,), haya un espacio; por ejemplo: 0, h, 2, 3, 3, 10.
+
+# Casos de Prueba
+Se suministran 6 casos de prueba. Los primeros 4 se ejecutan de manera exitosa, mientras que los últimos 2 están diseñados para fallar en el inicio.
+
+Explicación de caso5.txt y caso6.txt
+Estos casos están pensados para generar errores específicos:
+
+* caso5.txt: Presenta un solapamiento al inicializar el tablero.
+
+* caso6.txt: Contiene una orientación errada para los vehículos.
