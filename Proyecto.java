@@ -366,7 +366,7 @@ class Consumidor extends Thread {
         while(monitor.isSimulador()) {
             monitor.MoverVehiculo(this);
             try {
-                Thread.sleep(1000); // Simula el tiempo que tarda el vehículo en intentar moverse
+                Thread.sleep(1500); // Simula el tiempo que tarda el vehículo en intentar moverse
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
